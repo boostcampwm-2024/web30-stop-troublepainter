@@ -28,21 +28,34 @@ const logoAlts: Record<LogoVariant, string> = {
   side: '보조 로고',
 };
 
-export interface LogoProps
-  extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt'>,
-    VariantProps<typeof logoVariants> {}
+const logoDescriptions: Record<LogoVariant, string> = {
+  main: '우리 프로젝트를 대표하는 메인 로고 이미지입니다',
+  side: '우리 프로젝트를 대표하는 보조 로고 이미지입니다',
+};
 
-const Logo = React.forwardRef<HTMLImageElement, LogoProps>(({ className, variant = 'main', ...props }, ref) => {
-  return (
-    <img
-      src={logoSources[variant as LogoVariant]}
-      alt={logoAlts[variant as LogoVariant]}
-      className={cn(logoVariants({ variant, className }))}
-      ref={ref}
-      {...props}
-    />
-  );
-});
+export interface LogoProps
+  extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src' | 'alt' | 'aria-label'>,
+    VariantProps<typeof logoVariants> {
+  /**
+   * 로고 이미지 설명을 위한 사용자 정의 aria-label
+   */
+  ariaLabel?: string;
+}
+
+const Logo = React.forwardRef<HTMLImageElement, LogoProps>(
+  ({ className, variant = 'main', ariaLabel, ...props }, ref) => {
+    return (
+      <img
+        src={logoSources[variant as LogoVariant]}
+        alt={logoAlts[variant as LogoVariant]}
+        aria-label={ariaLabel ?? logoDescriptions[variant as LogoVariant]}
+        className={cn(logoVariants({ variant, className }))}
+        ref={ref}
+        {...props}
+      />
+    );
+  },
+);
 Logo.displayName = 'Logo';
 
 export { Logo, logoVariants };
