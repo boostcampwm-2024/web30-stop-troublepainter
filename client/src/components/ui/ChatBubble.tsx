@@ -27,28 +27,22 @@ export interface ChatBubbleProps extends React.HTMLAttributes<HTMLDivElement>, V
   nickname?: string;
 }
 
-const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(({ className, variant, size, ...props }, ref) => {
-  const { nickname, content } = props;
-  return (
-    <div className="bg-violet-400">
-      {nickname && (
-        <div className="flex flex-col items-start gap-0.5">
-          <div className="text-xs text-eastbay-50">{nickname}</div>
+const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
+  ({ className, variant, size, content, nickname, ...props }, ref) => {
+    const isLeftAligned = Boolean(nickname);
+
+    return (
+      <div className="bg-violet-400">
+        <div className={cn('flex', isLeftAligned ? 'flex-col items-start gap-0.5' : 'justify-end')}>
+          {nickname && <div className="text-xs text-eastbay-50">{nickname}</div>}
           <span className={cn(chatBubbleVariants({ variant, size, className }))} ref={ref} {...props}>
             {content}
           </span>
         </div>
-      )}
-      {!nickname && (
-        <div className="flex justify-end">
-          <span className={cn(chatBubbleVariants({ variant, size, className }))} ref={ref} {...props}>
-            {content}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-});
+      </div>
+    );
+  },
+);
 ChatBubble.displayName = 'ChatBubble';
 
 export { ChatBubble, chatBubbleVariants };
