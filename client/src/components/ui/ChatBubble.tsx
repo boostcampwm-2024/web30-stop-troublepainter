@@ -35,7 +35,7 @@ const ChatBubble = forwardRef<HTMLDivElement, ChatBubbleProps>(
       <div
         aria-label={ariaLabel}
         tabIndex={0}
-        className={cn('flex bg-violet-400', isOtherUser ? 'flex-col items-start gap-0.5' : 'justify-end')}
+        className={cn('flex', isOtherUser ? 'flex-col items-start gap-0.5' : 'justify-end')}
       >
         {isOtherUser && (
           <span className="text-xs text-eastbay-50" aria-hidden="true">
