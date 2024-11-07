@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { forwardRef, HTMLAttributes } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 
@@ -21,18 +21,19 @@ const chatBubbleVariants = cva(
   },
 );
 
-export interface ChatBubbleProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof chatBubbleVariants> {
+export interface ChatBubbleProps extends HTMLAttributes<HTMLDivElement>, VariantProps<typeof chatBubbleVariants> {
   content: string;
   nickname?: string;
 }
 
-const ChatBubble = React.forwardRef<HTMLDivElement, ChatBubbleProps>(
+const ChatBubble = forwardRef<HTMLDivElement, ChatBubbleProps>(
   ({ className, variant, size, content, nickname, ...props }, ref) => {
     const isOtherUser = Boolean(nickname);
+    const ariaLabel = isOtherUser ? `${nickname}님의 메시지: ${content}` : `내 메시지: ${content}`;
 
     return (
       <div
-        aria-label={isOtherUser ? `${nickname}님의 메시지: ${content}` : `내 메시지: ${content}`}
+        aria-label={ariaLabel}
         tabIndex={0}
         className={cn('flex bg-violet-400', isOtherUser ? 'flex-col items-start gap-0.5' : 'justify-end')}
       >
