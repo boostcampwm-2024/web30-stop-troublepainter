@@ -1,62 +1,62 @@
-import { forwardRef, HTMLAttributes, KeyboardEvent, PropsWithChildren } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { Button } from './Button';
+import { HTMLAttributes, KeyboardEvent, PropsWithChildren } from 'react';
 import { cn } from '@/utils/cn';
 
-interface ModalProps extends PropsWithChildren<HTMLAttributes<HTMLDivElement>>, VariantProps<typeof modalVariants> {
-  asChild?: boolean;
+interface ModalProps extends PropsWithChildren<HTMLAttributes<HTMLDivElement>> {
   title: string;
-  haveConfirmButton?: boolean;
-  handleConfirm?: () => void;
   canManualClose?: boolean;
   closeModal: () => void;
+  isModalOpened: boolean;
+  handleKeyDown?: (e: KeyboardEvent) => void;
 }
 
-const modalVariants = cva('relative overflow-hidden flex-col justify-center rounded-xl w-full h-auto', {
-  variants: {
-    variant: {
-      primary: 'bg-violet-100 border-2 border-violet-950',
-    },
-  },
-  defaultVariants: {
-    variant: 'primary',
-  },
-});
-
-const Modal = forwardRef<HTMLDivElement, ModalProps>(
-  ({ className, variant, haveConfirmButton, closeModal, canManualClose, title, children, ...props }, ref) => {
-    const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-      if (e.key === 'Escape') closeModal();
-    };
-
-    return (
+const Modal = ({
+  className,
+  handleKeyDown,
+  closeModal,
+  isModalOpened,
+  canManualClose,
+  title,
+  children,
+  ...props
+}: ModalProps) => {
+  return (
+    <div
+      className={cn(
+        'fixed left-0 top-0 flex h-full w-full items-center justify-center',
+        isModalOpened ? 'pointer-events-auto' : 'pointer-events-none',
+      )}
+      onClick={canManualClose ? closeModal : undefined}
+      onKeyDown={handleKeyDown}
+      tabIndex={0}
+    >
       <div
-        className="fixed left-0 top-0 flex h-full w-full items-center justify-center overflow-y-auto bg-violet-950 bg-opacity-50"
-        onClick={canManualClose ? closeModal : undefined}
+        className={cn(
+          'absolute left-0 top-0 h-full w-full bg-violet-950',
+          isModalOpened ? 'opacity-50' : 'opacity-0',
+          'transition-opacity duration-300 ease-in-out',
+        )}
+      />
+
+      <div
+        className={cn(
+          isModalOpened ? 'opacity-100' : 'opacity-0',
+          'relative h-auto w-full flex-col justify-center overflow-hidden rounded-xl border-2 border-violet-950 bg-violet-100 transition-opacity duration-300 ease-in-out',
+          className,
+        )}
+        onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
         tabIndex={0}
+        {...props}
       >
-        <div
-          className={cn(modalVariants({ variant, className }))}
-          onClick={(e) => e.stopPropagation()}
-          onKeyDown={handleKeyDown}
-          tabIndex={0}
-          ref={ref}
-          {...props}
-        >
-          <div className="g-auto flex min-h-16 items-center justify-center border-b-2 border-violet-950 bg-violet-500 px-3 py-3">
-            <h2 className="translate-y-1 text-4xl text-stroke-md">{title}</h2>
-          </div>
-          <div className="flex h-full flex-col items-center justify-center gap-6 px-3 py-6">
-            {children}
-            {haveConfirmButton && <Button className="max-w-80">OK</Button>}
-          </div>
+        <div className="g-auto flex min-h-16 items-center justify-center border-b-2 border-violet-950 bg-violet-500 px-3 py-3">
+          <h2 className="translate-y-1 text-4xl text-stroke-md">{title}</h2>
         </div>
+        <div className="p-5">{children}</div>
       </div>
-    );
-  },
-);
+    </div>
+  );
+};
 
 Modal.displayName = 'Modal';
 
-export { Modal, modalVariants };
+export { Modal };
