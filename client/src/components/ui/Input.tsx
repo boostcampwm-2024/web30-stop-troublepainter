@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { forwardRef, useId } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 
@@ -25,8 +25,8 @@ export interface InputProps
   label?: string;
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(({ className, variant, size, label, ...props }, ref) => {
-  const inputId = React.useId();
+const Input = forwardRef<HTMLInputElement, InputProps>(({ className, variant, size, label, ...props }, ref) => {
+  const inputId = useId();
 
   return (
     <>
