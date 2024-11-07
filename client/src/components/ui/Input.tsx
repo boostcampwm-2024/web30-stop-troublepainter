@@ -1,4 +1,4 @@
-import { forwardRef, useId } from 'react';
+import { forwardRef, InputHTMLAttributes, useId } from 'react';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/utils/cn';
 
@@ -18,7 +18,7 @@ const inputVariants = cva('px-4', {
 });
 
 export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>,
     VariantProps<typeof inputVariants> {
   asChild?: boolean;
   placeholder: string;
