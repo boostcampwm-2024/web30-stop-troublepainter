@@ -77,7 +77,7 @@ export default {
       addUtilities({
         '.text-stroke-sm': {
           color: '#EBE9FF',
-          'text-shadow': '-1px -1px 0 #200940, 1px -1px 0 #200940, -1px 1px 0 #200940, 1px 1px 0 #200940',
+          'text-shadow': `-1px -1px 0 #200940,1px -1px 0 #200940,-1px 1px 0 #200940,1px 1px 0 #200940,-1px 0 0 #200940,1px 0 0 #200940,0 -1px 0 #200940,0 1px 0 #200940,0 0 1px #200940`,
         },
         '.text-stroke-md': {
           color: '#EBE9FF',
