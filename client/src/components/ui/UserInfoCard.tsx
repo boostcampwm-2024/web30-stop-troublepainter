@@ -1,10 +1,9 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import clsx from 'clsx';
-import crownFirst from '@/assets/crown-first.png';
-import crownSecond from '@/assets/crown-first.png';
-import crownThird from '@/assets/crown-first.png';
 import profilePlaceholder from '@/assets/profile-placeholder.png';
+import { ReadyStatus, UserRank } from '@/types/userInfo.types';
 import { cn } from '@/utils/cn';
+import getCrownImage from '@/utils/getCrownImage';
 
 const userInfoCardVariants = cva(
   'flex items-center justify-between w-[18.25rem] border-2 h-[5.5rem] border-violet-950 rounded-lg transition-colors duration-200 p-3 gap-2',
@@ -32,7 +31,7 @@ interface UserInfoCardProps extends VariantProps<typeof userInfoCardVariants> {
 
   /// 게임방 필수
   // 사용자 순위 (1~3등일 경우 왕관 표시)
-  rank?: number;
+  rank?: UserRank;
   // 사용자 점수 (게임 중일 때만 표시)
   score?: number;
   // 사용자 역할 (그림꾼, 방해꾼 등)
@@ -74,15 +73,37 @@ const UserInfoCard = ({
   status = 'notReady',
   className,
 }: UserInfoCardProps) => {
+  // 순위에 따른 Crown Image 렌더링 로직
+  const showCrown = rank !== undefined && rank <= 3;
+  const crownImage = showCrown ? getCrownImage(rank) : null;
+
+  // 준비 상태 표시 섹션 재료, 추후 픽셀아트로 디자인 할 예정
+  const READY_STATUS_CONFIG: Record<
+    ReadyStatus,
+    {
+      text: string;
+      className: string;
+    }
+  > = {
+    ready: {
+      text: '준비완료',
+      className: 'text-white bg-violet-400',
+    },
+    notReady: {
+      text: '대기중',
+      className: 'bg-white/10 text-white/60',
+    },
+  } as const;
+
   return (
     <div className={cn(userInfoCardVariants({ status }), className)}>
       <div className="flex items-center gap-3">
         {/* 프로필 이미지 섹션 */}
         <div className="bg-white/20 relative flex h-14 w-14 items-center justify-center rounded-full">
           <img src={profileImage || profilePlaceholder} alt="사용자 프로필" />
-          {rank !== undefined && rank <= 3 && (
+          {crownImage && (
             <img
-              src={rank === 1 ? crownFirst : rank === 2 ? crownSecond : crownThird}
+              src={crownImage}
               alt={`${rank}등 사용자`}
               className="absolute -right-5 -top-7 h-12 w-auto rotate-[30deg]"
             />
@@ -115,15 +136,15 @@ const UserInfoCard = ({
         </div>
       )}
 
-      {/* 준비 상태 표시 섹션, 추후 픽셀아트로 디자인 할 예정 */}
+      {/* 준비 상태 표시 섹션 */}
       {status !== 'gaming' && (
         <div
           className={cn(
             'rounded-md px-3 py-1 text-sm font-medium',
-            status === 'ready' ? 'text-white bg-violet-400' : 'bg-white/10 text-white/60',
+            READY_STATUS_CONFIG[status || 'notReady'].className,
           )}
         >
-          {status === 'ready' ? '준비완료' : '대기중'}
+          {READY_STATUS_CONFIG[status || 'notReady'].text}
         </div>
       )}
     </div>
