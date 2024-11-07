@@ -2,7 +2,7 @@ import './App.css';
 import { useState } from 'react';
 import helpIcon from '@/assets/help-icon.svg';
 import { Button } from '@/components/ui/Button';
-import UserInfoCard from '@/components/ui/UserInfoCard';
+import { UserInfoCard } from '@/components/ui/UserInfoCard';
 
 const App = () => {
   const [isReady, setIsReady] = useState(false);

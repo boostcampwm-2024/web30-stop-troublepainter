@@ -177,4 +177,4 @@ const UserInfoCard = ({
   );
 };
 
-export default UserInfoCard;
+export { UserInfoCard, userInfoCardVariants };
