@@ -1,31 +1,12 @@
-import { forwardRef, InputHTMLAttributes, useId } from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { InputHTMLAttributes, useId } from 'react';
 import { cn } from '@/utils/cn';
 
-const inputVariants = cva('px-4', {
-  variants: {
-    variant: {
-      default: 'border-2 border-violet-950 rounded-lg',
-    },
-    size: {
-      default: 'h-11 w-full text-base placeholder:text-eastbay-500 text-violet-950 ',
-    },
-  },
-  defaultVariants: {
-    variant: 'default',
-    size: 'default',
-  },
-});
-
-export interface InputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'>,
-    VariantProps<typeof inputVariants> {
-  asChild?: boolean;
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   placeholder: string;
   label?: string;
 }
 
-const Input = forwardRef<HTMLInputElement, InputProps>(({ className, variant, size, label, ...props }, ref) => {
+const Input = ({ className, label, ...props }: InputProps) => {
   const inputId = useId();
 
   return (
@@ -36,13 +17,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ className, variant, si
       <input
         id={inputId}
         type="text"
-        className={cn(inputVariants({ variant, size, className }))}
-        ref={ref}
+        className={cn(
+          'h-11 w-full rounded-lg border-2 border-violet-950 px-4 text-base text-violet-950 placeholder:text-eastbay-500',
+          className,
+        )}
         {...props}
       />
     </>
   );
-});
-Input.displayName = 'Input';
+};
 
-export { Input, inputVariants };
+export { Input };
