@@ -116,6 +116,23 @@ export const useDrawingState = (options?: { maxPixels?: number }) => {
     return true;
   }, [inkRemaining, actions]);
 
+  const resetDrawingState = useCallback(() => {
+    // CRDT 초기화
+    crdtRef.current = new LWWMap(currentPlayerId || 'player');
+
+    // 히스토리 상태 초기화
+    strokeHistoryRef.current = [];
+    currentStrokeIdsRef.current = [];
+    historyPointerRef.current = -1;
+
+    // 잉크량 초기화
+    setInkRemaining(maxPixels);
+
+    // Undo/Redo 상태 초기화
+    setCanUndo(false);
+    setCanRedo(false);
+  }, [currentPlayerId, maxPixels]);
+
   return {
     currentPlayerId,
     currentColor,
@@ -134,5 +151,6 @@ export const useDrawingState = (options?: { maxPixels?: number }) => {
     historyPointerRef,
     updateHistoryState,
     checkInkAvailability,
+    resetDrawingState,
   };
 };

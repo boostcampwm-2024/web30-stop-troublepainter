@@ -2,11 +2,10 @@ import { RefObject, useCallback } from 'react';
 import {
   Point,
   CRDTMessage,
-  MapState,
-  RegisterState,
-  DrawingData,
   CRDTMessageTypes,
   CRDTUpdateMessage,
+  CRDTSyncMessage,
+  RoomStatus,
 } from '@troublepainter/core';
 import { useDrawingOperation } from './useDrawingOperation';
 import { useDrawingState } from './useDrawingState';
@@ -79,7 +78,11 @@ import { DRAWING_MODE } from '@/constants/canvasConstants';
  *
  * @category Hooks
  */
-export const useDrawing = (canvasRef: RefObject<HTMLCanvasElement>, options?: { maxPixels?: number }) => {
+export const useDrawing = (
+  canvasRef: RefObject<HTMLCanvasElement>,
+  roomStatus: RoomStatus,
+  options?: { maxPixels?: number },
+) => {
   const state = useDrawingState(options);
   const operation = useDrawingOperation(canvasRef, state);
 
@@ -241,31 +244,20 @@ export const useDrawing = (canvasRef: RefObject<HTMLCanvasElement>, options?: { 
       if (!state.crdtRef.current) return;
 
       if (crdtDrawingData.type === CRDTMessageTypes.SYNC) {
-        const updatedKeys = state.crdtRef.current.merge(crdtDrawingData.state as MapState);
-        if (updatedKeys.length === 0) return;
-        // 전체 동기화 후 캔버스 다시 그리기
+        state.crdtRef.current.merge(crdtDrawingData.state);
         operation.redrawCanvas();
 
-        state.strokeHistoryRef.current = [
-          {
-            strokeIds: updatedKeys,
-            isLocal: false,
-            drawingData: state.crdtRef.current.strokes[state.crdtRef.current.strokes.length - 1].stroke,
-          },
-        ];
-        state.historyPointerRef.current = 0;
-        state.updateHistoryState();
+        if (roomStatus === 'DRAWING') {
+          state.strokeHistoryRef.current = [];
+          state.historyPointerRef.current = -1;
+          state.updateHistoryState();
+        }
       } else if (crdtDrawingData.type === CRDTMessageTypes.UPDATE) {
-        const { key, register } = crdtDrawingData.state as {
-          key: string;
-          register: RegisterState<DrawingData | null>;
-        };
-
+        const { key, register } = crdtDrawingData.state;
         const peerId = key.split('-')[0];
         const isLocalUpdate = peerId === state.currentPlayerId;
 
         if (!state.crdtRef.current.mergeRegister(key, register) || isLocalUpdate) return;
-        // 원격 업데이트의 경우 캔버스 다시 그리기
         operation.redrawCanvas();
 
         const stroke = register[2];
@@ -274,6 +266,7 @@ export const useDrawing = (canvasRef: RefObject<HTMLCanvasElement>, options?: { 
         if (state.historyPointerRef.current < state.strokeHistoryRef.current.length - 1) {
           state.strokeHistoryRef.current = state.strokeHistoryRef.current.slice(0, state.historyPointerRef.current + 1);
         }
+
         state.strokeHistoryRef.current.push({
           strokeIds: [key],
           isLocal: false,
@@ -283,8 +276,22 @@ export const useDrawing = (canvasRef: RefObject<HTMLCanvasElement>, options?: { 
         state.updateHistoryState();
       }
     },
-    [state.currentPlayerId, operation.redrawCanvas, state.updateHistoryState],
+    [state.currentPlayerId, operation.redrawCanvas, state.updateHistoryState, roomStatus],
   );
+
+  const getAllDrawingData = useCallback((): CRDTSyncMessage | null => {
+    if (!state.crdtRef.current) return null;
+
+    return {
+      type: CRDTMessageTypes.SYNC,
+      state: state.crdtRef.current.state,
+    };
+  }, [state.crdtRef]);
+
+  const resetCanvas = useCallback(() => {
+    state.resetDrawingState(); // 상태 초기화
+    operation.clearCanvas(); // 캔버스 초기화
+  }, [state.resetDrawingState, operation.clearCanvas]);
 
   return {
     currentColor: state.currentColor,
@@ -302,5 +309,7 @@ export const useDrawing = (canvasRef: RefObject<HTMLCanvasElement>, options?: { 
     applyDrawing,
     undo,
     redo,
+    getAllDrawingData,
+    resetCanvas,
   };
 };

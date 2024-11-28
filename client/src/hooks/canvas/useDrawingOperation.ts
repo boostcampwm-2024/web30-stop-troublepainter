@@ -154,10 +154,16 @@ export const useDrawingOperation = (
     [currentColor, inkRemaining, getCurrentStyle, setInkRemaining],
   );
 
+  const clearCanvas = useCallback(() => {
+    const { canvas, ctx } = getCanvasContext(canvasRef);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }, []);
+
   return {
     getCurrentStyle,
     drawStroke,
     redrawCanvas,
     floodFill,
+    clearCanvas,
   };
 };
